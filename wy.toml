@@ -1,0 +1,12 @@
+[package]
+name="conway"
+authors=["David J. Pearce"]
+version="0.1.0"
+
+[build]
+platforms=["whiley","js"]
+
+[dependencies]
+html="0.1.10"
+js="0.1.3"
+std="0.2.18"

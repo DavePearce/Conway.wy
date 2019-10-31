@@ -1,0 +1,24 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+    <title></title>
+    <link href="conway.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="../bin/js/std.js"></script>
+    <script type="text/javascript" src="../bin/js/js.js"></script>
+    <script type="text/javascript" src="../bin/js/html.js"></script>     
+    <script type="text/javascript" src="../bin/js/conway.js"></script>
+    <script type="text/javascript" src="conway.js"></script>    
+</head>
+
+<body bgcolor="#ffffff">
+  <h1>Conway's Game of Life (in Whiley)</h1>
+  <center>
+    <canvas id="mycanvas" width="1800" height="1200"></canvas>
+  </center>
+  <script>
+    window.onload = function() { 
+      var canvas = document.getElementById("mycanvas");
+      run(document,canvas);
+    }
+</script>
+</body>
+</html>
