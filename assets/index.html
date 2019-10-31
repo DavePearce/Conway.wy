@@ -5,7 +5,6 @@
     <script type="text/javascript" src="../bin/js/js.js"></script>
     <script type="text/javascript" src="../bin/js/html.js"></script>     
     <script type="text/javascript" src="../bin/js/conway.js"></script>
-    <script type="text/javascript" src="conway.js"></script>
     <style>
       body { background: #DDDDDD; }
       canvas { height: 90%; width: 90%; margin: 0; border: 1px solid black; }
@@ -18,9 +17,16 @@
     <canvas id="mycanvas" width="1800" height="1200"></canvas>
   </center>
   <script>
+    function loop(canvas,state) {      
+      state = main$update(state);
+      main$draw(canvas,state);    
+      requestAnimationFrame(() => loop(canvas,state));
+    }
+    
     window.onload = function() { 
-      var canvas = document.getElementById("mycanvas");
-      run(document,canvas);
+       var canvas = document.getElementById("mycanvas");
+       var state = main$init(canvas.width,canvas.height);
+       loop(canvas,state);
     }
 </script>
 </body>
