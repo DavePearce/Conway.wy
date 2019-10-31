@@ -5,7 +5,8 @@ import HTMLCanvasElement from w3c::dom
 import CanvasRenderingContext2D from w3c::dom
 
 /**
- * Define the board state.
+ * Define the board state with the requirement that the width and
+ * height match the length of the cells array.
  */
 public type State is {
     bool[] cells,
@@ -14,7 +15,9 @@ public type State is {
 } where |cells| == width * height
 
 /**
- * Intialise the game in a window with given dimensions.
+ * Intialise the game in a window with given dimensions.  Since the
+ * width and height come from the Canvas properties, assume they are
+ * non-negative.
  */
 public export method init(uint width, uint height) -> State:
     //
@@ -28,21 +31,25 @@ public export method init(uint width, uint height) -> State:
     }
 
 /**
- * Event handler for click events which toggle a square on or off
+ * Event handler for click events which toggle a square on or off.
+ * Since this the click locations are generated on the JavaScript
+ * side, I'll assume they could be anything.  However, assume
+ * state is still valid since it's only ever created and manipulated
+ * on the Whiley side.
  */
-public export function click(uint x, uint y, State s) -> State
-// Clicked location must be in bounds.
-requires x < s.width && y < s.height:
-    //
-    int index = x + (y * s.width)
-    s.cells[index] = !s.cells[index]
+public export function click(int x, int y, State s) -> State:
+    // Check clicked location is within bounds.
+    if x >= 0 && y >= 0 && x < s.width && y < s.height:
+        int index = x + (y * s.width)
+        s.cells[index] = !s.cells[index]
     //
     return s
 
 /**
  * Update the game based on the current arrangement of live cells.
  * This applies the three rules of Conway's game of life to either
- * kill cells or to create new cells.
+ * kill cells or to create new cells.  Again, since state is only ever
+ * created and manipulated on the Whiley side, assume it is valid.
  */
 public export function update(State state)->State:
     // Create copy of cells array
@@ -80,6 +87,12 @@ public export function update(State state)->State:
     // Done
     return state
 
+/**
+ * Count the number of living cells surrounding a given cell on the
+ * board.  Since there are at most eight neighbouring cells for any
+ * given cell, the result can be at most eight.  Cells on the board
+ * are assumed to be next to dead cells.
+ */
 function count_living(uint x, uint y, State state) -> (uint r)
 // There are at most 8 neighbours
 ensures r <= 8:

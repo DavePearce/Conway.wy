@@ -8,6 +8,13 @@ platforms=["whiley","js"]
 
 [build.whiley]
 source="src/whiley"
+verify=false
+
+[check]
+min=-4
+max=4
+length=4
+ignores=["main::draw"]
 
 [dependencies]
 html="0.1.10"
