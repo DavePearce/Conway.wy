@@ -1,6 +1,5 @@
 import uint from std::integer
 
-import from_string from js::util
 import HTMLCanvasElement from w3c::dom
 import CanvasRenderingContext2D from w3c::dom
 
@@ -55,11 +54,9 @@ public export function update(State state)->State:
     // Create copy of cells array
     bool[] ncells = state.cells
     // Iterate through all cells
-    uint x = 0
-    while x < state.width:
-        uint y = 0
-        while y < state.height:
-            int c = count_living(x,y,state)
+    for x in 0..state.width:
+        for y in 0..state.height:
+            int c = count_living((uint) x, (uint) y,state)
             int i = x + (state.width*y)
             // Check whether cell alive or dead
             if alive(x,y,state) == 1:
@@ -78,10 +75,7 @@ public export function update(State state)->State:
             else if c == 3:
                 // Any dead cell with exactly three live neighbours 
                 // becomes a live cell, as if by reproduction.
-                ncells[i] = true                
-            y = y + 1
-            //
-        x = x + 1
+                ncells[i] = true
     // Switch over new cells array
     state.cells = ncells
     // Done
@@ -97,7 +91,7 @@ function count_living(uint x, uint y, State state) -> (uint r)
 // There are at most 8 neighbours
 ensures r <= 8:
     //
-    int count = alive(x-1,y-1,state)
+    uint count = alive(x-1,y-1,state)
     count = count + alive(x-1,y,state)
     count = count + alive(x-1,y+1,state)
     count = count + alive(x,y-1,state)    
@@ -112,7 +106,7 @@ ensures r <= 8:
  * integer for convenience when implementing the count_living function
  * above.
  */
-function alive(int x, int y, State state) -> (int r)
+function alive(int x, int y, State state) -> (uint r)
 // Return is either zero or one
 ensures (r == 0) || (r == 1):
     //
@@ -131,23 +125,18 @@ ensures (r == 0) || (r == 1):
  * black.
  */
 public export method draw(HTMLCanvasElement canvas, State state):
-    CanvasRenderingContext2D ctx = canvas->getContext(from_string("2d"))
+    CanvasRenderingContext2D ctx = canvas->getContext("2d")
     // Light gray for box outline
-    ctx->strokeStyle = from_string("#DDDDDD")
+    ctx->strokeStyle = "#DDDDDD"
     //
-    uint x = 0
-    while x < state.width:
-        uint y = 0
-        while y < state.height:
+    for x in 0..state.width:
+        for y in 0..state.height:
             // Check whether cell alive or dead
             if alive(x,y,state) == 1:
-                ctx->fillStyle = from_string("#000000")
+                ctx->fillStyle = "#000000"
             else:
-                ctx->fillStyle = from_string("#FFFFFF")
+                ctx->fillStyle = "#FFFFFF"
             //
             ctx->fillRect(x*20,y*20,20,20) 
             ctx->strokeRect(x*20,y*20,20,20) 
-            y = y + 1
-        //
-        x = x + 1
     // Done
