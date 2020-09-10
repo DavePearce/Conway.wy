@@ -9,3 +9,5 @@ jobs:
 
       - name: Build Project
         uses: Whiley/WhileyBuildAction@v1
+        with:
+          checking: true
