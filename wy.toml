@@ -10,6 +10,9 @@ platforms=["whiley","js"]
 source="src/whiley"
 verify=false
 
+[build.js]
+target="public/js"
+
 [check]
 min=-1
 max=1
