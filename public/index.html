@@ -5,7 +5,6 @@
     <script type="text/javascript" src="js/js.js"></script>
     <script type="text/javascript" src="js/dom.js"></script>     
     <script type="text/javascript" src="js/conway.js"></script>
-    <script type="text/javascript" src="js/game.js"></script>    
     <style>
       body { background: #DDDDDD; }
       h1 { font-family: monospace; }
@@ -21,15 +20,11 @@
     <div>
       <canvas id="mycanvas" width="800" height="500"></canvas>
       <button id="startstop" type="button" onclick="startstop">START</button>
-      <input type="range" min="1" max="2000" value="100" class="slider" id="range">      
     </div>
   </center>
   <script>
     window.onload = function() { 
-      var canvas = document.getElementById("mycanvas");
-      var button = document.getElementById("startstop");
-      var slider = document.getElementById("range");
-      run(canvas,button,slider);
+	main$main(window,document.getElementById("mycanvas"),800,500);
     }    
 </script>
 </body>

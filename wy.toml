@@ -7,7 +7,6 @@ version="0.1.0"
 platforms=["whiley","js"]
 
 [build.whiley]
-source="src/whiley"
 verify=false
 
 [build.js]
@@ -20,4 +19,4 @@ length=3
 ignores=["main::draw"]
 
 [dependencies]
-dom="0.1.0"
+dom="0.2.0"
