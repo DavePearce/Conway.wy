@@ -7,7 +7,6 @@ version="0.1.0"
 platforms=["whiley","js"]
 
 [build.whiley]
-source="src/whiley"
 verify=false
 
 [build.js]
