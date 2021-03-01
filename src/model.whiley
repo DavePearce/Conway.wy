@@ -15,7 +15,9 @@ public type State is {
  * width and height come from the Canvas properties, assume they are
  * non-negative.
  */
-public function init(uint width, uint height) -> State:
+public function init(uint width, uint height) -> (State r)
+ensures r.width == width / 20
+ensures r.height == height / 20:
     //
     width = width / 20
     height = height / 20
@@ -32,12 +34,18 @@ public function init(uint width, uint height) -> State:
  * side, I'll assume they could be anything.  However, assume
  * state is still valid since it's only ever created and manipulated
  * on the Whiley side.
+ *
+ * We give this a partial spec, saying what changes, but not spelling out the
+ * details that everything else does not change.
  */
-public function click(int x, int y, State s) -> State:
+public function click(int x, int y, State s) -> (State r)
+ensures 0 <= x && x < s.width && 0 <= y && y < s.height ==> r.cells[x + y * s.width] == !s.cells[x + y * s.width]:
     // Check clicked location is within bounds.
     if x >= 0 && y >= 0 && x < s.width && y < s.height:
         int index = x + (y * s.width)
+        assume index < s.width * s.height
         s.cells[index] = !s.cells[index]
+        // s.width, s.height = s.height, s.width  // keeps the invariant.  verifies.
     //
     return s
 
@@ -51,10 +59,14 @@ public function update(State state)->State:
     // Create copy of cells array
     bool[] ncells = state.cells
     // Iterate through all cells
-    for x in 0..state.width:
-        for y in 0..state.height:
+    for x in 0..state.width
+    where |ncells| == |state.cells|:
+        for y in 0..state.height
+        where |ncells| == |state.cells|:
             int c = count_living((uint) x, (uint) y,state)
-            int i = x + (state.width*y)
+            int i = x + (y*state.width)
+            assume i < state.width * state.height
+            // assume i < |ncells|
             // Check whether cell alive or dead
             if alive(x,y,state) == 1:
                 switch c:
@@ -77,6 +89,7 @@ public function update(State state)->State:
     state.cells = ncells
     // Done
     return state
+
 
 /**
  * Count the number of living cells surrounding a given cell on the
@@ -111,8 +124,11 @@ ensures (r == 0) || (r == 1):
         return 0
     else if y < 0 || y >= state.height:
         return 0
-    else if state.cells[x + (y*state.width)]:
-        return 1
     else:
-        return 0
+        int index = x + (y*state.width)
+        assume index < state.width * state.height
+        if state.cells[index]:
+            return 1
+        else:
+            return 0
 
