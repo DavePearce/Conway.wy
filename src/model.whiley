@@ -14,7 +14,7 @@ public type State is {
  * Intialise the game in a window with given dimensions.  Since the
  * width and height come from the Canvas properties, assume they are
  * non-negative.
- */
+ *
 public function init(uint width, uint height) -> (State r)
 ensures r.width == width / 20
 ensures r.height == height / 20:
@@ -27,7 +27,7 @@ ensures r.height == height / 20:
         width: width,
         height: height
     }
-
+*/
 /**
  * Event handler for click events which toggle a square on or off.
  * Since this the click locations are generated on the JavaScript
@@ -43,9 +43,7 @@ ensures 0 <= x && x < s.width && 0 <= y && y < s.height ==> r.cells[x + y * s.wi
     // Check clicked location is within bounds.
     if x >= 0 && y >= 0 && x < s.width && y < s.height:
         int index = x + (y * s.width)
-        assume index < s.width * s.height
         s.cells[index] = !s.cells[index]
-        // s.width, s.height = s.height, s.width  // keeps the invariant.  verifies.
     //
     return s
 
@@ -65,8 +63,6 @@ public function update(State state)->State:
         where |ncells| == |state.cells|:
             int c = count_living((uint) x, (uint) y,state)
             int i = x + (y*state.width)
-            assume i < state.width * state.height
-            // assume i < |ncells|
             // Check whether cell alive or dead
             if alive(x,y,state) == 1:
                 switch c:
@@ -120,15 +116,12 @@ function alive(int x, int y, State state) -> (uint r)
 // Return is either zero or one
 ensures (r == 0) || (r == 1):
     //
-    if x < 0 || x >= state.width:
-        return 0
-    else if y < 0 || y >= state.height:
-        return 0
-    else:
+    if 0 <= x && x < state.width && 0 <= y && y < state.height:
         int index = x + (y*state.width)
-        assume index < state.width * state.height
         if state.cells[index]:
             return 1
         else:
             return 0
+    else:
+        return 0
 
