@@ -15,9 +15,13 @@ public type State is {
  * width and height come from the Canvas properties, assume they are
  * non-negative.
  */
+ 
+
 public function init(uint width, uint height) -> (State r)
 ensures r.width == width / 20
-ensures r.height == height / 20:
+ensures r.height == height / 20
+ensures |r.cells| == r.width*r.height
+ensures all {i in 0..|r.cells| | r.cells[i] == false}:
     //
     width = width / 20
     height = height / 20
@@ -27,6 +31,7 @@ ensures r.height == height / 20:
         width: width,
         height: height
     }
+
 
 /**
  * Event handler for click events which toggle a square on or off.
@@ -38,8 +43,11 @@ ensures r.height == height / 20:
  * We give this a partial spec, saying what changes, but not spelling out the
  * details that everything else does not change.
  */
+ 
 public function click(int x, int y, State s) -> (State r)
-ensures 0 <= x && x < s.width && 0 <= y && y < s.height ==> r.cells[x + y * s.width] == !s.cells[x + y * s.width]:
+ensures s.height == r.height && s.width == r.width
+ensures 0 <= x && x < s.width && 0 <= y && y < s.height ==> r.cells[x + y * s.width] == !s.cells[x + y * s.width]
+ensures all {a in 0..s.width, b in 0..s.height | a != x || b != y <==> r.cells[a + b * s.width] == s.cells[a + b * s.width]}:
     // Check clicked location is within bounds.
     if x >= 0 && y >= 0 && x < s.width && y < s.height:
         int index = x + (y * s.width)
@@ -55,20 +63,32 @@ ensures 0 <= x && x < s.width && 0 <= y && y < s.height ==> r.cells[x + y * s.wi
  * kill cells or to create new cells.  Again, since state is only ever
  * created and manipulated on the Whiley side, assume it is valid.
  */
-public function update(State state)->State:
+ 
+public function update(State state)-> (State r)
+requires state.width > 0 && state.height > 0
+ensures state.width == r.width && state.height == r.height
+ensures all {a in 0..state.width, b in 0..state.height | some {j in 0..|state.cells| | j == a + (b * state.width) && j < |r.cells| && j >= 0 && r.cells[j] == true
+    ==> count_living((uint) a, (uint) b, state) == 3 || (count_living((uint) a, (uint) b, state) == 2 && alive(a, b, state) == 1)}}:
     // Create copy of cells array
     bool[] ncells = state.cells
     // Iterate through all cells
     for x in 0..state.width
-    where |ncells| == |state.cells|:
+    where |ncells| == |state.cells|
+    where all {g in 0..x, d in 0..state.height | some {j in 0..|state.cells| | j == g + (d * state.width) && j < |ncells| && j >= 0 && ncells[j] == true
+    ==> count_living((uint) g, (uint) d, state) == 3 || (count_living((uint) g, (uint) d, state) == 2 && alive(g, d, state) == 1)}}:
         for y in 0..state.height
-        where |ncells| == |state.cells|:
+        where |ncells| == |state.cells|
+        where all {e in 0..x, f in 0..y | some {j in 0..|state.cells| | j == e + (f * state.width) && j < |ncells| && j >= 0 && ncells[j] == true
+        ==> count_living((uint) e, (uint) f, state) == 3 || (count_living((uint) e, (uint) f, state) == 2 && alive(e, f, state) == 1)}}:
             int c = count_living((uint) x, (uint) y,state)
             int i = x + (y*state.width)
             assume i < state.width * state.height
             // assume i < |ncells|
             // Check whether cell alive or dead
             if alive(x,y,state) == 1:
+                assume i >= 0
+                assume i < |ncells|
+                assume ncells[i] == true
                 switch c:
                     case 0,1:
                         // Any live cell with fewer than two live neighbours dies, 
@@ -84,6 +104,8 @@ public function update(State state)->State:
             else if c == 3:
                 // Any dead cell with exactly three live neighbours 
                 // becomes a live cell, as if by reproduction.
+                assume i >= 0
+                assume i < |ncells|
                 ncells[i] = true
     // Switch over new cells array
     state.cells = ncells
@@ -97,7 +119,8 @@ public function update(State state)->State:
  * given cell, the result can be at most eight.  Cells on the board
  * are assumed to be next to dead cells.
  */
-function count_living(uint x, uint y, State state) -> (uint r)
+public function count_living(uint x, uint y, State state) -> (uint r)
+requires x >= 0 && x < state.width && y >= 0 && y < state.height
 // There are at most 8 neighbours
 ensures r <= 8:
     //
@@ -116,19 +139,11 @@ ensures r <= 8:
  * integer for convenience when implementing the count_living function
  * above.
  */
-function alive(int x, int y, State state) -> (uint r)
+public function alive(int x, int y, State state) -> (uint r)
 // Return is either zero or one
-ensures (r == 0) || (r == 1):
-    //
-    if x < 0 || x >= state.width:
-        return 0
-    else if y < 0 || y >= state.height:
+ensures (r == 0 || r == 1)
+ensures x < 0 || x >= state.width || y < 0 || y >= state.height || some {i in 0..|state.cells| | i == x + (y*state.width) && !state.cells[i]} <==> r == 0:
+    if x < 0 || x >= state.width || y < 0 || y >= state.height || !state.cells[x + (y*state.width)]:
         return 0
     else:
-        int index = x + (y*state.width)
-        assume index < state.width * state.height
-        if state.cells[index]:
-            return 1
-        else:
-            return 0
-
+        return 1
