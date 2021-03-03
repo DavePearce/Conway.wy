@@ -8,24 +8,26 @@ public type State is {
     bool[] cells,
     uint width,
     uint height
-} where |cells| == width * height
+} where |cells| == width * height && width > 0 && height > 0
 
 /**
  * Intialise the game in a window with given dimensions.  Since the
  * width and height come from the Canvas properties, assume they are
  * non-negative.
  */
- 
-
 public function init(uint width, uint height) -> (State r)
-ensures r.width == width / 20
-ensures r.height == height / 20
+ensures width >= 20 ==> r.width == width / 20
+ensures height >= 20 ==> r.height == height / 20
+ensures width < 20 ==> r.width == 1
+ensures height < 20 ==> r.height == 1
 ensures |r.cells| == r.width*r.height
 ensures all {i in 0..|r.cells| | r.cells[i] == false}:
-    //
     width = width / 20
     height = height / 20
-    //
+    if (width <= 0):
+        width = 1
+    if (height <= 0):
+        height = 1
     return {
         cells: [false; width*height],
         width: width,
@@ -43,7 +45,6 @@ ensures all {i in 0..|r.cells| | r.cells[i] == false}:
  * We give this a partial spec, saying what changes, but not spelling out the
  * details that everything else does not change.
  */
- 
 public function click(int x, int y, State s) -> (State r)
 ensures s.height == r.height && s.width == r.width
 ensures 0 <= x && x < s.width && 0 <= y && y < s.height ==> r.cells[x + y * s.width] == !s.cells[x + y * s.width]
@@ -57,38 +58,30 @@ ensures all {a in 0..s.width, b in 0..s.height | a != x || b != y <==> r.cells[a
     //
     return s
 
+
+
 /**
  * Update the game based on the current arrangement of live cells.
  * This applies the three rules of Conway's game of life to either
  * kill cells or to create new cells.  Again, since state is only ever
  * created and manipulated on the Whiley side, assume it is valid.
  */
- 
 public function update(State state)-> (State r)
-requires state.width > 0 && state.height > 0
-ensures state.width == r.width && state.height == r.height
-ensures all {a in 0..state.width, b in 0..state.height | some {j in 0..|state.cells| | j == a + (b * state.width) && j < |r.cells| && j >= 0 && r.cells[j] == true
-    ==> count_living((uint) a, (uint) b, state) == 3 || (count_living((uint) a, (uint) b, state) == 2 && alive(a, b, state) == 1)}}:
+ensures state.width == r.width && state.height == r.height:
     // Create copy of cells array
     bool[] ncells = state.cells
     // Iterate through all cells
     for x in 0..state.width
-    where |ncells| == |state.cells|
-    where all {g in 0..x, d in 0..state.height | some {j in 0..|state.cells| | j == g + (d * state.width) && j < |ncells| && j >= 0 && ncells[j] == true
-    ==> count_living((uint) g, (uint) d, state) == 3 || (count_living((uint) g, (uint) d, state) == 2 && alive(g, d, state) == 1)}}:
+    where |ncells| == |state.cells|:
         for y in 0..state.height
-        where |ncells| == |state.cells|
-        where all {e in 0..x, f in 0..y | some {j in 0..|state.cells| | j == e + (f * state.width) && j < |ncells| && j >= 0 && ncells[j] == true
-        ==> count_living((uint) e, (uint) f, state) == 3 || (count_living((uint) e, (uint) f, state) == 2 && alive(e, f, state) == 1)}}:
+        where all {a in 0..x, b in 0..y | (a*state.height + b) < |ncells| && (a*state.height + b) >= 0
+            && (count_living((uint) a, (uint) b,state) == 3 ==> ncells[a*state.height + b])}
+        where |ncells| == |state.cells|:
             int c = count_living((uint) x, (uint) y,state)
-            int i = x + (y*state.width)
-            assume i < state.width * state.height
-            // assume i < |ncells|
+            int i = (x*state.height) + y
             // Check whether cell alive or dead
-            if alive(x,y,state) == 1:
-                assume i >= 0
-                assume i < |ncells|
-                assume ncells[i] == true
+            if state.cells[i]:
+            //if alive(x,y,state) == 1:
                 switch c:
                     case 0,1:
                         // Any live cell with fewer than two live neighbours dies, 
@@ -103,15 +96,12 @@ ensures all {a in 0..state.width, b in 0..state.height | some {j in 0..|state.ce
                         ncells[i] = false
             else if c == 3:
                 // Any dead cell with exactly three live neighbours 
-                // becomes a live cell, as if by reproduction.
-                assume i >= 0
-                assume i < |ncells|
-                ncells[i] = true
+                // becomes a live cell, as if by reproduction. 
+                ncells[i] = true 
     // Switch over new cells array
     state.cells = ncells
     // Done
-    return state
-
+    return state    
 
 /**
  * Count the number of living cells surrounding a given cell on the
@@ -142,8 +132,8 @@ ensures r <= 8:
 public function alive(int x, int y, State state) -> (uint r)
 // Return is either zero or one
 ensures (r == 0 || r == 1)
-ensures x < 0 || x >= state.width || y < 0 || y >= state.height || some {i in 0..|state.cells| | i == x + (y*state.width) && !state.cells[i]} <==> r == 0:
-    if x < 0 || x >= state.width || y < 0 || y >= state.height || !state.cells[x + (y*state.width)]:
+ensures x < 0 || x >= state.width || y < 0 || y >= state.height || some {i in 0..|state.cells| | i == (x*state.height) + y && !state.cells[i]} <==> r == 0:
+    if x < 0 || x >= state.width || y < 0 || y >= state.height || !state.cells[(x*state.height) + y]:
         return 0
     else:
         return 1
