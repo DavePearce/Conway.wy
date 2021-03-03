@@ -66,42 +66,49 @@ ensures all {a in 0..s.width, b in 0..s.height | a != x || b != y <==> r.cells[a
  * kill cells or to create new cells.  Again, since state is only ever
  * created and manipulated on the Whiley side, assume it is valid.
  */
+ 
 public function update(State state)-> (State r)
 ensures state.width == r.width && state.height == r.height:
     // Create copy of cells array
     bool[] ncells = state.cells
     // Iterate through all cells
-    for x in 0..state.width
+    for y in 0..state.height
     where |ncells| == |state.cells|:
-        for y in 0..state.height
-        where all {a in 0..x, b in 0..y | (a*state.height + b) < |ncells| && (a*state.height + b) >= 0
-            && (count_living((uint) a, (uint) b,state) == 3 ==> ncells[a*state.height + b])}
-        where |ncells| == |state.cells|:
+        for x in 0..state.width
+        where |ncells| == |state.cells| && all {a in 0..x, b in 0..y | (a + b*state.width) < |ncells| && a + b*state.width >= 0
+        && ncells[a + b*state.width] == update_cell(a + b*state.width, count_living((uint) a, (uint) b, state), state.cells[a + b*state.width])}:
             int c = count_living((uint) x, (uint) y,state)
-            int i = (x*state.height) + y
-            // Check whether cell alive or dead
-            if state.cells[i]:
-            //if alive(x,y,state) == 1:
-                switch c:
-                    case 0,1:
-                        // Any live cell with fewer than two live neighbours dies, 
-                        // as if caused by under-population.
-                        ncells[i] = false
-                    case 2,3:
-                        // Any live cell with two or three live neighbours lives
-                        // on to the next generation.
-                    case 4,5,6,7,8:
-                        // Any live cell with more than three live neighbours dies, 
-                        // as if by overcrowding.
-                        ncells[i] = false
-            else if c == 3:
-                // Any dead cell with exactly three live neighbours 
-                // becomes a live cell, as if by reproduction. 
-                ncells[i] = true 
+            int i = x + y*state.width
+            ncells[i] = update_cell(i, c, state.cells[i])
     // Switch over new cells array
     state.cells = ncells
     // Done
-    return state    
+    return state   
+
+
+public function update_cell(int index, int count, bool alive) -> (bool out)
+requires index >= 0 && count >= 0 && count <= 8
+ensures out <==> count == 3 || (alive && count == 2):
+    if alive:
+        switch count:
+            case 0,1:
+                // Any live cell with fewer than two live neighbours dies, 
+                // as if caused by under-population.
+                return false
+            case 2,3:
+                // Any live cell with two or three live neighbours lives
+                // on to the next generation.
+                return true
+            case 4,5,6,7,8: 
+                // Any live cell with more than three live neighbours dies, 
+                // as if by overcrowding.
+                return false
+    else if count == 3:
+        // Any dead cell with exactly three live neighbours 
+        // becomes a live cell, as if by reproduction. 
+        return true
+    // Other dead cells remain dead
+    return false
 
 /**
  * Count the number of living cells surrounding a given cell on the
@@ -132,8 +139,8 @@ ensures r <= 8:
 public function alive(int x, int y, State state) -> (uint r)
 // Return is either zero or one
 ensures (r == 0 || r == 1)
-ensures x < 0 || x >= state.width || y < 0 || y >= state.height || some {i in 0..|state.cells| | i == (x*state.height) + y && !state.cells[i]} <==> r == 0:
-    if x < 0 || x >= state.width || y < 0 || y >= state.height || !state.cells[(x*state.height) + y]:
+ensures x < 0 || x >= state.width || y < 0 || y >= state.height || some {i in 0..|state.cells| | i == x + y*state.width && !state.cells[i]} <==> r == 0:
+    if x < 0 || x >= state.width || y < 0 || y >= state.height || !state.cells[x + y*state.width]:
         return 0
     else:
         return 1
