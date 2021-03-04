@@ -58,38 +58,39 @@ ensures all {a in 0..s.width, b in 0..s.height | a != x || b != y <==> r.cells[a
     //
     return s
 
-
-
 /**
  * Update the game based on the current arrangement of live cells.
  * This applies the three rules of Conway's game of life to either
  * kill cells or to create new cells.  Again, since state is only ever
  * created and manipulated on the Whiley side, assume it is valid.
  */
- 
 public function update(State state)-> (State r)
+ensures all {j in 0..|r.cells| | r.cells[j] == update_cell(j, state)}
 ensures state.width == r.width && state.height == r.height:
     // Create copy of cells array
     bool[] ncells = state.cells
     // Iterate through all cells
     for y in 0..state.height
-    where |ncells| == |state.cells|:
+    where |ncells| == |state.cells|
+    where all {j in 0..(y*state.width) | j < |ncells| && j >= 0 && ncells[j] == update_cell(j, state)}:
         for x in 0..state.width
-        where |ncells| == |state.cells| && all {a in 0..x, b in 0..y | (a + b*state.width) < |ncells| && a + b*state.width >= 0
-        && ncells[a + b*state.width] == update_cell(a + b*state.width, count_living((uint) a, (uint) b, state), state.cells[a + b*state.width])}:
-            int c = count_living((uint) x, (uint) y,state)
+        where |ncells| == |state.cells|
+        where all {j in 0..(x + y*state.width)| j < |ncells| && j >= 0 && ncells[j] == update_cell(j, state)}:
             int i = x + y*state.width
-            ncells[i] = update_cell(i, c, state.cells[i])
+            ncells[i] = update_cell(i, state)
     // Switch over new cells array
     state.cells = ncells
     // Done
     return state   
 
-
-public function update_cell(int index, int count, bool alive) -> (bool out)
-requires index >= 0 && count >= 0 && count <= 8
-ensures out <==> count == 3 || (alive && count == 2):
-    if alive:
+/**
+ * Updates a cell according to Conway's game of life rules
+ */
+public function update_cell(int index, State state) -> (bool out)
+requires index >= 0 && index < |state.cells|
+ensures out <==> count_living((uint) index, state) == 3 || (state.cells[index] && count_living((uint) index,state) == 2):
+    uint count = count_living((uint) index, state)
+    if state.cells[index]:
         switch count:
             case 0,1:
                 // Any live cell with fewer than two live neighbours dies, 
@@ -116,10 +117,12 @@ ensures out <==> count == 3 || (alive && count == 2):
  * given cell, the result can be at most eight.  Cells on the board
  * are assumed to be next to dead cells.
  */
-public function count_living(uint x, uint y, State state) -> (uint r)
-requires x >= 0 && x < state.width && y >= 0 && y < state.height
+public function count_living(uint index, State state) -> (uint r)
+requires index < |state.cells|
 // There are at most 8 neighbours
 ensures r <= 8:
+    int x = index % state.width
+    int y = index / state.width
     //
     uint count = alive(x-1,y-1,state)
     count = count + alive(x-1,y,state)
