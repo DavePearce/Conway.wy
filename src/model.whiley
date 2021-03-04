@@ -14,6 +14,7 @@ public type State is {
  * Intialise the game in a window with given dimensions.  Since the
  * width and height come from the Canvas properties, assume they are
  * non-negative.
+ *
  */
 public function init(uint width, uint height) -> (State r)
 ensures width >= 20 ==> r.width == width / 20
@@ -34,7 +35,6 @@ ensures all {i in 0..|r.cells| | r.cells[i] == false}:
         height: height
     }
 
-
 /**
  * Event handler for click events which toggle a square on or off.
  * Since this the click locations are generated on the JavaScript
@@ -52,9 +52,7 @@ ensures all {a in 0..s.width, b in 0..s.height | a != x || b != y <==> r.cells[a
     // Check clicked location is within bounds.
     if x >= 0 && y >= 0 && x < s.width && y < s.height:
         int index = x + (y * s.width)
-        assume index < s.width * s.height
         s.cells[index] = !s.cells[index]
-        // s.width, s.height = s.height, s.width  // keeps the invariant.  verifies.
     //
     return s
 
