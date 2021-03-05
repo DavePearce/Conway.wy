@@ -30,6 +30,7 @@ ensures all {i in 0..|r.cells| | r.cells[i] == false}:
         width: width,
         height: height
     }
+     
 
 /**
  * Event handler for click events which toggle a square on or off.
@@ -41,10 +42,11 @@ ensures all {i in 0..|r.cells| | r.cells[i] == false}:
  * We give this a partial spec, saying what changes, but not spelling out the
  * details that everything else does not change.
  */
+ 
 public function click(int x, int y, State s) -> (State r)
 ensures s.height == r.height && s.width == r.width
-ensures 0 <= x && x < s.width && 0 <= y && y < s.height ==> r.cells[x + y * s.width] == !s.cells[x + y * s.width]
-ensures all {a in 0..s.width, b in 0..s.height | a != x || b != y <==> r.cells[a + b * s.width] == s.cells[a + b * s.width]}:
+ensures all {a in 0..s.width, b in 0..s.height | (a + b * s.width < |r.cells|) && (a != x || b != y) <==> r.cells[a + b * s.width] == s.cells[a + b * s.width]}
+ensures 0 <= x && x < s.width && 0 <= y && y < s.height ==> r.cells[x + y * s.width] == !s.cells[x + y * s.width]:
     // Check clicked location is within bounds.
     if x >= 0 && y >= 0 && x < s.width && y < s.height:
         int index = x + (y * s.width)
@@ -52,13 +54,13 @@ ensures all {a in 0..s.width, b in 0..s.height | a != x || b != y <==> r.cells[a
     //
     return s
 
+
 /**
  * Update the game based on the current arrangement of live cells.
  * This applies the three rules of Conway's game of life to either
  * kill cells or to create new cells.  Again, since state is only ever
  * created and manipulated on the Whiley side, assume it is valid.
  */
-
 public function update(State state)-> (State r)
 ensures all {j in 0..|r.cells| | r.cells[j] == update_cell(j, state)}
 ensures state.width == r.width && state.height == r.height:
@@ -107,7 +109,7 @@ ensures out <==> count_living((uint) index, state) == 3 || (state.cells[index] &
         return true
     // Other dead cells remain dead
     return false
-
+     
 /**
  * Count the number of living cells surrounding a given cell on the
  * board.  Since there are at most eight neighbouring cells for any
@@ -144,4 +146,3 @@ ensures x < 0 || x >= state.width || y < 0 || y >= state.height || some {i in 0.
         return 0
     else:
         return 1
-
