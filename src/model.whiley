@@ -17,14 +17,11 @@ public type State is {
  *
  */
 public function init(uint width, uint height) -> (State r)
-requires width >= 20
-requires height >= 20
-ensures r.width == width / 20
-ensures r.height == height / 20
+requires width > 0 && height > 0
+ensures r.width == width
+ensures r.height == height
 ensures |r.cells| == r.width*r.height
 ensures all {i in 0..|r.cells| | r.cells[i] == false}:
-    width = width / 20
-    height = height / 20
     return {
         cells: [false; width*height],
         width: width,
