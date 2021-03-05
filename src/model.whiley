@@ -17,6 +17,8 @@ public type State is {
  *
  */
 public function init(uint width, uint height) -> (State r)
+requires width >= 20
+requires height >= 20
 ensures r.width == width / 20
 ensures r.height == height / 20
 ensures |r.cells| == r.width*r.height
@@ -56,6 +58,7 @@ ensures all {a in 0..s.width, b in 0..s.height | a != x || b != y <==> r.cells[a
  * kill cells or to create new cells.  Again, since state is only ever
  * created and manipulated on the Whiley side, assume it is valid.
  */
+
 public function update(State state)-> (State r)
 ensures all {j in 0..|r.cells| | r.cells[j] == update_cell(j, state)}
 ensures state.width == r.width && state.height == r.height:
@@ -73,11 +76,13 @@ ensures state.width == r.width && state.height == r.height:
     // Switch over new cells array
     state.cells = ncells
     // Done
-    return state   
+    return state  
+
 
 /**
  * Updates a cell according to Conway's game of life rules
  */
+
 public function update_cell(int index, State state) -> (bool out)
 requires index >= 0 && index < |state.cells|
 ensures out <==> count_living((uint) index, state) == 3 || (state.cells[index] && count_living((uint) index,state) == 2):
@@ -139,3 +144,4 @@ ensures x < 0 || x >= state.width || y < 0 || y >= state.height || some {i in 0.
         return 0
     else:
         return 1
+
