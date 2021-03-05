@@ -68,14 +68,14 @@ ensures state.width == r.width && state.height == r.height:
     // Create copy of cells array
     bool[] ncells = state.cells
     // Iterate through all cells
-    for y in 0..state.height
-    where |ncells| == |state.cells|
-    where all {j in 0..(y*state.width) | j < |ncells| && j >= 0 && ncells[j] == update_cell(j, state)}:
-        for x in 0..state.width
-        where |ncells| == |state.cells|
-        where all {j in 0..(x + y*state.width)| j < |ncells| && j >= 0 && ncells[j] == update_cell(j, state)}:
-            int i = x + y*state.width
-            ncells[i] = update_cell(i, state)
+    // for y in 0..state.height
+    // where |ncells| == |state.cells|
+    // where all {j in 0..(y*state.width) | j < |ncells| && j >= 0 && ncells[j] == update_cell(j, state)}:
+    //     for x in 0..state.width
+    //     where |ncells| == |state.cells|
+    //     where all {j in 0..(x + y*state.width)| j < |ncells| && j >= 0 && ncells[j] == update_cell(j, state)}:
+    //         int i = x + y*state.width
+    //         ncells[i] = update_cell(i, state)
     // Switch over new cells array
     state.cells = ncells
     // Done

@@ -4,7 +4,7 @@ authors=["David J. Pearce"]
 version="0.1.0"
 
 [build]
-platforms=["whiley","js", "boogie"]
+platforms=["whiley", "boogie"]
 
 [build.whiley]
 verify=false
@@ -14,7 +14,6 @@ target="public/js"
 
 [build.boogie]
 timeout=30
-verify=false
 
 [check]
 min=-1
@@ -23,4 +22,4 @@ length=3
 ignores=["main::draw"]
 
 [dependencies]
-dom="0.2.0"
+std="0.3.1"
