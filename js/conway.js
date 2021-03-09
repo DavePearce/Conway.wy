@@ -1,4 +1,70 @@
 'use strict';
+function main$State$Q6WindowQ17HTMLCanvasElementQ5model5State$Q5State(window, canvas, game) {
+   return new Wy.Record({window: window, canvas: canvas, game: Wy.copy(game), running: false});
+}
+function main$main(window, canvas, width, height) {
+   let document = window.document;
+   let c = document.getElementById("mycanvas");
+   let b = document.getElementById("startstop");
+   let m = model$init$Q4uintQ4uint$Q5State(width, height);
+   let st = new Wy.Ref(main$State$Q6WindowQ17HTMLCanvasElementQ5model5State$Q5State(window, canvas, Wy.copy(m)));
+   c.addEventListener("click", function(st) {
+      return function(e) {
+         return main$onclick_canvas$Q10MouseEventqQ5State$V(e, st);
+      };
+   }(st));
+   b.addEventListener("click", function(b, st) {
+      return function(e) {
+         return main$onclick_button$Q7ElementqQ5State$V(b, st);
+      };
+   }(b, st));
+   main$loop$qQ5State$V(st);
+}
+function main$onclick_canvas$Q10MouseEventqQ5State$V(e, st) {
+   let x = Math.floor(e.offsetX / 20);
+   let y = Math.floor(e.offsetY / 20);
+   let g = model$click$IIQ5State$Q5State(x, y, st.$ref.game);
+    {
+      const $0 = Wy.copy(g.cells);
+      st.$ref.game.cells = $0;
+   }
+}
+function main$onclick_button$Q7ElementqQ5State$V(b, st) {
+   if(st.$ref.running)  {
+       {
+         const $1 = false;
+         st.$ref.running = $1;
+      }
+       {
+         const $2 = "START";
+         b.textContent = $2;
+      }
+   } else  {
+       {
+         const $3 = true;
+         st.$ref.running = $3;
+      }
+       {
+         const $4 = "STOP";
+         b.textContent = $4;
+      }
+   }
+}
+function main$loop$qQ5State$V(st) {
+   if(st.$ref.running)  {
+      let g = model$update$Q5State$Q5State(st.$ref.game);
+       {
+         const $5 = Wy.copy(g.cells);
+         st.$ref.game.cells = $5;
+      }
+   }
+   view$draw(st.$ref.canvas, st.$ref.game);
+   st.$ref.window.requestAnimationFrame(function(st) {
+      return function(ms) {
+         return main$loop$qQ5State$V(st);
+      };
+   }(st));
+}
 function model$State$type($) {
    return $.cells.length === ($.width * $.height);
 }
@@ -11,8 +77,8 @@ function model$click$IIQ5State$Q5State(x, y, s) {
    if((x >= 0) && ((y >= 0) && ((x < s.width) && (y < s.height))))  {
       let index = x + (y * s.width);
        {
-         const $0 = !s.cells[index];
-         s.cells[index] = $0;
+         const $6 = !s.cells[index];
+         s.cells[index] = $6;
       }
    }
    return Wy.copy(s);
@@ -58,32 +124,32 @@ function model$count_living$Q4uintQ4uintQ5State$Q4uint(x, y, state) {
    let r;
    let count = model$alive$IIQ5State$Q4uint(x - 1, y - 1, Wy.copy(state));
     {
-      const $1 = count + model$alive$IIQ5State$Q4uint(x - 1, y, Wy.copy(state));
-      count = $1;
-   }
-    {
-      const $2 = count + model$alive$IIQ5State$Q4uint(x - 1, y + 1, Wy.copy(state));
-      count = $2;
-   }
-    {
-      const $3 = count + model$alive$IIQ5State$Q4uint(x, y - 1, Wy.copy(state));
-      count = $3;
-   }
-    {
-      const $4 = count + model$alive$IIQ5State$Q4uint(x, y + 1, Wy.copy(state));
-      count = $4;
-   }
-    {
-      const $5 = count + model$alive$IIQ5State$Q4uint(x + 1, y - 1, Wy.copy(state));
-      count = $5;
-   }
-    {
-      const $6 = count + model$alive$IIQ5State$Q4uint(x + 1, y, Wy.copy(state));
-      count = $6;
-   }
-    {
-      const $7 = count + model$alive$IIQ5State$Q4uint(x + 1, y + 1, Wy.copy(state));
+      const $7 = count + model$alive$IIQ5State$Q4uint(x - 1, y, Wy.copy(state));
       count = $7;
+   }
+    {
+      const $8 = count + model$alive$IIQ5State$Q4uint(x - 1, y + 1, Wy.copy(state));
+      count = $8;
+   }
+    {
+      const $9 = count + model$alive$IIQ5State$Q4uint(x, y - 1, Wy.copy(state));
+      count = $9;
+   }
+    {
+      const $10 = count + model$alive$IIQ5State$Q4uint(x, y + 1, Wy.copy(state));
+      count = $10;
+   }
+    {
+      const $11 = count + model$alive$IIQ5State$Q4uint(x + 1, y - 1, Wy.copy(state));
+      count = $11;
+   }
+    {
+      const $12 = count + model$alive$IIQ5State$Q4uint(x + 1, y, Wy.copy(state));
+      count = $12;
+   }
+    {
+      const $13 = count + model$alive$IIQ5State$Q4uint(x + 1, y + 1, Wy.copy(state));
+      count = $13;
    }
    return count;
 }
@@ -100,6 +166,30 @@ function model$alive$IIQ5State$Q4uint(x, y, state) {
          } else  {
             return 0;
          }
+      }
+   }
+}
+function view$draw(canvas, state) {
+   let ctx = canvas.getContext("2d");
+    {
+      const $14 = "#DDDDDD";
+      ctx.strokeStyle = $14;
+   }
+   for(let x = 0;x < state.width;x = x + 1) {
+      for(let y = 0;y < state.height;y = y + 1) {
+         if(model$alive$IIQ5State$Q4uint(x, y, Wy.copy(state)) === 1)  {
+             {
+               const $15 = "#000000";
+               ctx.fillStyle = $15;
+            }
+         } else  {
+             {
+               const $16 = "#FFFFFF";
+               ctx.fillStyle = $16;
+            }
+         }
+         ctx.fillRect(x * 20, y * 20, 20, 20);
+         ctx.strokeRect(x * 20, y * 20, 20, 20);
       }
    }
 }
