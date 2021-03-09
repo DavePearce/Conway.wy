@@ -6,9 +6,6 @@ version="0.1.0"
 [build]
 platforms=["whiley","js"]
 
-[build.whiley]
-verify=false
-
 [build.js]
 target="public/js"
 
