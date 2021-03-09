@@ -15,10 +15,11 @@ public type State is {
  * width and height come from the Canvas properties, assume they are
  * non-negative.
  */
-public function init(uint width, uint height) -> State:
-    //
-    width = width / 20
-    height = height / 20
+public function init(uint width, uint height) -> (State r)
+// Resulting board has corresponding dimensions
+ensures r.width == width && r.height == height
+// Initial board has no alive cells
+ensures all { k in 0..|r.cells| | r.cells[k] == false}:
     //
     return {
         cells: [false; width*height],
@@ -33,7 +34,9 @@ public function init(uint width, uint height) -> State:
  * state is still valid since it's only ever created and manipulated
  * on the Whiley side.
  */
-public function click(int x, int y, State s) -> State:
+public function click(int x, int y, State s) -> (State ns)
+// Dimensions of the board remain unchanged
+ensures (s.width == ns.width) && (s.height == ns.height):
     // Check clicked location is within bounds.
     if x >= 0 && y >= 0 && x < s.width && y < s.height:
         int index = x + (y * s.width)
@@ -47,12 +50,14 @@ public function click(int x, int y, State s) -> State:
  * kill cells or to create new cells.  Again, since state is only ever
  * created and manipulated on the Whiley side, assume it is valid.
  */
-public function update(State state)->State:
+public function update(State state) -> (State nstate)
+// Dimensions of the board remain unchanged
+ensures (state.width == nstate.width) && (state.height == nstate.height):
     // Create copy of cells array
     bool[] ncells = state.cells
     // Iterate through all cells
-    for x in 0..state.width:
-        for y in 0..state.height:
+    for x in 0..state.width where |ncells| == |state.cells|:
+        for y in 0..state.height where |ncells| == |state.cells|:
             int c = count_living((uint) x, (uint) y,state)
             int i = x + (state.width*y)
             // Check whether cell alive or dead
@@ -115,4 +120,3 @@ ensures (r == 0) || (r == 1):
         return 1
     else:
         return 0
-

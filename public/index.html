@@ -23,8 +23,14 @@
     </div>
   </center>
   <script>
-    window.onload = function() { 
-	main$main(window,document.getElementById("mycanvas"),800,500);
+    window.onload = function() {
+	// extract canvas
+	var canvas = document.getElementById("mycanvas");
+	// determine width & height (in tiles)
+	const width = Math.floor(canvas.width/20);
+	const height = Math.floor(canvas.height/20)
+	// go!
+	main$main(window,canvas,width,height);
     }    
 </script>
 </body>
