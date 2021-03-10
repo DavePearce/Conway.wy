@@ -8,16 +8,18 @@ function main$main(window, canvas, width, height) {
    let b = document.getElementById("startstop");
    let m = model$init$Q4uintQ4uint$Q5State(width, height);
    let st = new Wy.Ref(main$State$Q6WindowQ17HTMLCanvasElementQ5model5State$Q5State(window, canvas, Wy.copy(m)));
-   c.addEventListener("click", function(st) {
+   let el1 = function(st) {
       return function(e) {
          return main$onclick_canvas$Q10MouseEventqQ5State$V(e, st);
       };
-   }(st));
-   b.addEventListener("click", function(b, st) {
+   }(st);
+   let el2 = function(b, st) {
       return function(e) {
          return main$onclick_button$Q7ElementqQ5State$V(b, st);
       };
-   }(b, st));
+   }(b, st);
+   c.addEventListener("click", el1);
+   b.addEventListener("click", el2);
    main$loop$qQ5State$V(st);
 }
 function main$onclick_canvas$Q10MouseEventqQ5State$V(e, st) {
