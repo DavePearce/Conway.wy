@@ -1,6 +1,6 @@
 import uint from std::integer
 import Window,Document,Element from w3c::dom
-import HTMLCanvasElement,MouseEvent from w3c::dom
+import HTMLCanvasElement,MouseEvent,EventListener from w3c::dom
 
 import model
 import view
@@ -36,8 +36,10 @@ public export method main(Window window, HTMLCanvasElement canvas, uint width, u
     // Create peristent state object
     &State st = new State(window, canvas, m)
     // Configure mouse click listener
-    c->addEventListener("click",&(MouseEvent e -> onclick_canvas(e,st)))
-    b->addEventListener("click",&(MouseEvent e -> onclick_button(b,st)))
+    EventListener el1 = &(MouseEvent e -> onclick_canvas(e,st))
+    EventListener el2 = &(MouseEvent e -> onclick_button(b,st))
+    c->addEventListener("click", el1)
+    b->addEventListener("click", el2)
     // Begin game loop
     loop(st)
 
