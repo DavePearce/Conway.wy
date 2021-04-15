@@ -32,14 +32,10 @@ ensures all {i in 0..|r.cells| | r.cells[i] == false}:
 /**
  * Event handler for click events which toggle a square on or off.
  * Since this the click locations are generated on the JavaScript
- * side, I'll assume they could be anything.  However, assume
+ * side, we assume they could be anything.  However, assume
  * state is still valid since it's only ever created and manipulated
  * on the Whiley side.
- *
- * We give this a partial spec, saying what changes, but not spelling out the
- * details that everything else does not change.
  */
- 
 public function click(int x, int y, State s) -> (State r)
 ensures s.height == r.height && s.width == r.width
 ensures all {a in 0..s.width, b in 0..s.height | (a + b * s.width < |r.cells|) && (a != x || b != y) <==> r.cells[a + b * s.width] == s.cells[a + b * s.width]}
@@ -52,6 +48,13 @@ ensures 0 <= x && x < s.width && 0 <= y && y < s.height ==> r.cells[x + y * s.wi
     return s
 
 
+/** Defines the rules for updating a single cell. */
+public property updated_cell(int index, State s, bool out) where
+    index >= 0 && index < |s.cells| &&
+    (out <==> (count_living((uint) index, s) == 3 
+           || (s.cells[index] && count_living((uint) index,s) == 2)))
+
+
 /**
  * Update the game based on the current arrangement of live cells.
  * This applies the three rules of Conway's game of life to either
@@ -59,7 +62,7 @@ ensures 0 <= x && x < s.width && 0 <= y && y < s.height ==> r.cells[x + y * s.wi
  * created and manipulated on the Whiley side, assume it is valid.
  */
 public function update(State state)-> (State r)
-ensures all {j in 0..|r.cells| | r.cells[j] == update_cell(j, state)}
+ensures all {j in 0..|r.cells| | updated_cell(j, state, r.cells[j]) }
 ensures state.width == r.width && state.height == r.height:
     // Create copy of cells array
     bool[] ncells = state.cells
@@ -79,12 +82,12 @@ ensures state.width == r.width && state.height == r.height:
 
 
 /**
- * Updates a cell according to Conway's game of life rules
+ * Calculate a cell update according to Conway's game of life rules
  */
 
 public function update_cell(int index, State state) -> (bool out)
 requires index >= 0 && index < |state.cells|
-ensures out <==> count_living((uint) index, state) == 3 || (state.cells[index] && count_living((uint) index,state) == 2):
+ensures updated_cell(index, state, out):
     uint count = count_living((uint) index, state)
     if state.cells[index]:
         switch count:
@@ -106,7 +109,8 @@ ensures out <==> count_living((uint) index, state) == 3 || (state.cells[index] &
         return true
     // Other dead cells remain dead
     return false
-     
+
+
 /**
  * Count the number of living cells surrounding a given cell on the
  * board.  Since there are at most eight neighbouring cells for any
