@@ -16,4 +16,4 @@ length=3
 ignores=["main::draw"]
 
 [dependencies]
-dom="0.2.0"
+dom="0.2.2"
