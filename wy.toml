@@ -6,6 +6,9 @@ version="0.1.0"
 [build]
 platforms=["whiley","js"]
 
+[build.boogie]
+timeout=60
+
 [build.js]
 target="public/js"
 
@@ -16,4 +19,4 @@ length=3
 ignores=["main::draw"]
 
 [dependencies]
-dom="0.2.0"
+dom="0.2.2"
