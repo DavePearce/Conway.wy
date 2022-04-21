@@ -17,3 +17,5 @@ ignores=["main::draw"]
 
 [dependencies]
 dom="0.2.2"
+js="0.1.7"
+std="0.3.2"
