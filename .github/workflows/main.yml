@@ -8,9 +8,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2	
       - name: Build Whiley Project
-        uses: Whiley/WhileyBuildAction@v2
-        with:
-          checking: false
+        uses: Whiley/WhileyBuildAction@master
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
