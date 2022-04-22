@@ -7,7 +7,7 @@ version="0.1.0"
 platforms=["whiley","boogie","js"]
 
 [build.boogie]
-timeout=240
+timeout=1000
 
 [build.js]
 target="public/js"
