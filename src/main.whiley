@@ -1,4 +1,4 @@
-import uint from std::integer
+import uint from std::int
 import Window,Document,Element from w3c::dom
 import HTMLCanvasElement,MouseEvent,EventListener from w3c::dom
 

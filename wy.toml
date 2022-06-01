@@ -4,10 +4,14 @@ authors=["David J. Pearce"]
 version="0.1.0"
 
 [build]
-platforms=["whiley","boogie","js"]
+platforms=["whiley","boogie"]
+
+[build.whiley]
+library=true
 
 [build.boogie]
-timeout=1000
+timeout=60
+verify=false
 
 [build.js]
 target="public/js"

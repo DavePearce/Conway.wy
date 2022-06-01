@@ -1,4 +1,4 @@
-import uint from std::integer
+import uint from std::int
 
 /**
  * Define the board state with the requirement that the width and
